@@ -1,0 +1,19 @@
+included:
+  - Sources
+  - Tests
+
+disabled_rules:
+  - todo # don't fail CI on TODO/FIXME markers
+
+identifier_name:
+  excluded:
+    - ai # public Sender case for the AI agent; a real two-letter domain term
+
+# The WebView setup (viewDidLoad) and the widget message dispatcher are
+# cohesive by nature — a switch over every widget message type and inline JS
+# injection. Allow them more room than the default rather than fragmenting
+# working WebKit/bridge code for a line count.
+function_body_length:
+  warning: 90
+cyclomatic_complexity:
+  warning: 15

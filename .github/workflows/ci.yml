@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  sdk-tests:
+    name: SDK build + tests
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      # Simulator names vary across runner images; pick whatever iPhone the
+      # image ships rather than hard-coding one.
+      - name: Pick a simulator
+        id: sim
+        run: |
+          NAME=$(xcrun simctl list devices available | grep -oE 'iPhone [0-9][^(]*' | head -1 | xargs)
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "Using simulator: $NAME"
+
+      - name: Run unit tests
+        run: |
+          xcodebuild -scheme GradientChat \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            test
+
+  lint:
+    name: SwiftLint
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      # --strict makes any warning fail the check.
+      - name: SwiftLint
+        run: swiftlint lint --strict
