@@ -10,6 +10,7 @@ final class ChatViewController: UIViewController {
     private let shortSession: Bool
     private var lastLoadedJwt: String
     private var lastLoadedConversationToken: String?
+    private var lastLoadedTags: [String]
     private var mainFrameLoadFailed = false
     private var didMoveVoiceOverFocus = false
     let interactiveToolCompletions = InteractiveToolCompletionCoordinator()
@@ -18,11 +19,12 @@ final class ChatViewController: UIViewController {
     private var bridge: WidgetBridge?
     private var fallbackCloseButton: UIButton?
 
-    init(widgetOrigin: String, jwt: String, conversationToken: String?, shortSession: Bool) {
+    init(widgetOrigin: String, jwt: String, conversationToken: String?, tags: [String], shortSession: Bool) {
         self.widgetOriginString = widgetOrigin
         self.widgetOriginURL = URL(string: widgetOrigin)
         self.lastLoadedJwt = jwt
         self.lastLoadedConversationToken = conversationToken
+        self.lastLoadedTags = tags
         self.shortSession = shortSession
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .fullScreen
@@ -143,25 +145,33 @@ final class ChatViewController: UIViewController {
         fallback.isHidden = true
         fallbackCloseButton = fallback
 
-        load(jwt: lastLoadedJwt, conversationToken: lastLoadedConversationToken)
+        load(jwt: lastLoadedJwt, conversationToken: lastLoadedConversationToken, tags: lastLoadedTags)
     }
 
     /// Called when `present` finds the chat already on screen, and by
-    /// `setUserJwt`. Reload only if the JWT or conversation token actually
-    /// changed under us, otherwise keep the live conversation as-is. A nil
-    /// `conversationToken` leaves the stored token unchanged; non-nil replaces it.
-    func reload(ifChangedJwt jwt: String, conversationToken: String?) {
+    /// `setUserJwt`. Reload only if the JWT, conversation token or tags
+    /// actually changed under us, otherwise keep the live conversation as-is. A
+    /// nil `conversationToken` leaves the stored token unchanged; non-nil
+    /// replaces it.
+    func reload(ifChangedJwt jwt: String, conversationToken: String?, tags: [String]) {
         let nextToken = conversationToken ?? lastLoadedConversationToken
-        guard jwt != lastLoadedJwt || nextToken != lastLoadedConversationToken else { return }
+        guard jwt != lastLoadedJwt || nextToken != lastLoadedConversationToken || tags != lastLoadedTags
+        else { return }
         lastLoadedJwt = jwt
         lastLoadedConversationToken = nextToken
+        lastLoadedTags = tags
         guard let webView, !mainFrameLoadFailed else {
-            load(jwt: jwt, conversationToken: nextToken)
+            load(jwt: jwt, conversationToken: nextToken, tags: tags)
             return
         }
         // A fragment assignment fires the widget's hashchange JWT path without
         // reloading the page, so the live conversation DOM is preserved.
-        let fragment = WidgetURL.fragment(jwt: jwt, conversationToken: nextToken, shortSession: shortSession)
+        let fragment = WidgetURL.fragment(
+            jwt: jwt,
+            conversationToken: nextToken,
+            tags: tags,
+            shortSession: shortSession
+        )
         webView.evaluateJavaScript(
             "location.hash = \(WidgetURL.jsString(fragment))",
             completionHandler: nil
@@ -177,11 +187,12 @@ final class ChatViewController: UIViewController {
             : .white
     }
 
-    private func load(jwt: String, conversationToken: String?) {
+    private func load(jwt: String, conversationToken: String?, tags: [String]) {
         guard let url = WidgetURL.load(
             origin: widgetOriginString,
             jwt: jwt,
             conversationToken: conversationToken,
+            tags: tags,
             shortSession: shortSession
         ) else {
             GradientChat.log.error("Invalid widget origin: \(self.widgetOriginString, privacy: .public)")
@@ -190,6 +201,7 @@ final class ChatViewController: UIViewController {
         mainFrameLoadFailed = false
         lastLoadedJwt = jwt
         lastLoadedConversationToken = conversationToken
+        lastLoadedTags = tags
         webView?.load(URLRequest(url: url))
     }
 

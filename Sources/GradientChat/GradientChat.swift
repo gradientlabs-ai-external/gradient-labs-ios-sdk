@@ -56,13 +56,14 @@ public enum GradientChat {
             return
         }
         if let live = liveChat {
-            live.reload(ifChangedJwt: cfg.userJwt, conversationToken: cfg.conversationToken)
+            live.reload(ifChangedJwt: cfg.userJwt, conversationToken: cfg.conversationToken, tags: cfg.tags)
             return
         }
         let chat = ChatViewController(
             widgetOrigin: widgetOrigin(),
             jwt: cfg.userJwt,
             conversationToken: cfg.conversationToken,
+            tags: cfg.tags,
             shortSession: shortSession()
         )
         liveChat = chat
@@ -82,9 +83,10 @@ public enum GradientChat {
         config = GradientChatConfig(
             widgetKey: current.widgetKey,
             userJwt: jwt,
-            conversationToken: resolvedToken
+            conversationToken: resolvedToken,
+            tags: current.tags
         )
-        liveChat?.reload(ifChangedJwt: jwt, conversationToken: resolvedToken)
+        liveChat?.reload(ifChangedJwt: jwt, conversationToken: resolvedToken, tags: current.tags)
     }
 
     /// Register a listener for SDK callbacks (auth errors, load failures).

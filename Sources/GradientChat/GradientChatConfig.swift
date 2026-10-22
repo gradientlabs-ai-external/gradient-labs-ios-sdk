@@ -7,15 +7,19 @@ import Foundation
 /// alongside the JWT (never inside it); the backend tokenizes it at session
 /// mint and replays it to the customer on tool/webhook calls. nil leaves any
 /// previously stored value unchanged; "" explicitly clears it.
+///
+/// `tags` label a new conversation and are ignored when an existing one resumes.
 public struct GradientChatConfig: Sendable {
     public let widgetKey: String
     public let userJwt: String
     public let conversationToken: String?
+    public let tags: [String]
 
-    public init(widgetKey: String, userJwt: String, conversationToken: String? = nil) {
+    public init(widgetKey: String, userJwt: String, conversationToken: String? = nil, tags: [String] = []) {
         self.widgetKey = widgetKey
         self.userJwt = userJwt
         self.conversationToken = conversationToken
+        self.tags = tags
     }
 }
 
