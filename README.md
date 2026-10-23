@@ -17,7 +17,7 @@ In Xcode: **File → Add Package Dependencies →**
 Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/gradientlabs-ai-external/gradient-labs-ios-sdk", from: "0.6.1")
+.package(url: "https://github.com/gradientlabs-ai-external/gradient-labs-ios-sdk", from: "0.6.2")
 ```
 
 ## Quick start
