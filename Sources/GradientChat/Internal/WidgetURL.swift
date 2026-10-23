@@ -11,10 +11,15 @@ enum WidgetURL {
     /// as a separate body field on the widget's session exchange, never inside
     /// the JWT). nil or "" omits the parameter, leaving any stored value
     /// unchanged.
-    static func fragment(jwt: String, conversationToken: String?, shortSession: Bool) -> String {
+    ///
+    /// Each tag adds "&tag={value}"; the widget sanitises them.
+    static func fragment(jwt: String, conversationToken: String?, tags: [String], shortSession: Bool) -> String {
         var fragment = "#jwt=\(jwt)"
         if let conversationToken, !conversationToken.isEmpty {
             fragment += "&conversation_token=\(percentEncoded(conversationToken))"
+        }
+        for tag in tags {
+            fragment += "&tag=\(percentEncoded(tag))"
         }
         if shortSession {
             fragment += "&use_short_session=1"
@@ -22,12 +27,19 @@ enum WidgetURL {
         return fragment
     }
 
-    static func load(origin: String, jwt: String, conversationToken: String?, shortSession: Bool) -> URL? {
-        URL(string: "\(origin)/\(fragment(jwt: jwt, conversationToken: conversationToken, shortSession: shortSession))")
+    static func load(
+        origin: String,
+        jwt: String,
+        conversationToken: String?,
+        tags: [String],
+        shortSession: Bool
+    ) -> URL? {
+        let fragment = fragment(jwt: jwt, conversationToken: conversationToken, tags: tags, shortSession: shortSession)
+        return URL(string: "\(origin)/\(fragment)")
     }
 
-    /// The conversation token is an opaque host value, so percent-encode it to
-    /// keep arbitrary characters from breaking the fragment.
+    /// Conversation tokens and tags are opaque host values, so percent-encode
+    /// them to keep arbitrary characters from breaking the fragment.
     private static func percentEncoded(_ value: String) -> String {
         value.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? value
     }
