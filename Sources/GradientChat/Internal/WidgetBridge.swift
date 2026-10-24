@@ -156,11 +156,8 @@ final class WidgetBridge: NSObject, WKScriptMessageHandler {
     }
 
     static func deeplinkEvent(requestID: String, rawURL: String) -> GradientChatEvent? {
-        guard !requestID.isEmpty,
-              let url = URL(string: rawURL),
-              url.scheme != nil
-        else { return nil }
-        return .deeplinkRequested(requestID: requestID, url: url)
+        guard let url = URL(string: rawURL), url.scheme != nil else { return nil }
+        return .deeplinkRequested(requestID: requestID.isEmpty ? nil : requestID, url: url)
     }
 
     private static func dispatchDeeplink(from object: [String: Any]) {
