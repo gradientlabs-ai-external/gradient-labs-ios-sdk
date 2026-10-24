@@ -59,5 +59,10 @@ func onChatEvent(_ event: GradientChatEvent)              // .started(conversati
 func onChatUnavailable(_ reason: GradientChatUnavailableReason)  // .notAvailable, .failedToLoad
 ```
 
-For `.deeplinkRequested`, open the native flow and then call
-`GradientChat.completeInteractiveTool(requestID:result:)` with its result.
+For `.deeplinkRequested`, open the screen the URL points to. When `requestID`
+is set, an interactive tool is waiting: call
+`GradientChat.completeInteractiveTool(requestID:result:)` with the flow's
+result. When it's `nil` (a link in an agent reply), there's nothing to report.
+
+Present the screen over the chat to keep the conversation underneath, or call
+`GradientChat.dismiss()` first to leave the chat.

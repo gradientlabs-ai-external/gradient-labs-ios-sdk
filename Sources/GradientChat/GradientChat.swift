@@ -153,7 +153,14 @@ public enum GradientChat {
             return
         }
         config = GradientChatConfig(widgetKey: current.widgetKey, userJwt: "")
-        liveChat?.dismiss(animated: true)
+        dismiss()
+    }
+
+    /// Closes the chat screen, along with anything presented over it, if it's
+    /// open. Unlike `logout`, the JWT stays so the conversation resumes on the
+    /// next `present`.
+    public static func dismiss(animated: Bool = true) {
+        liveChat?.presentingViewController?.dismiss(animated: animated)
         liveChat = nil
     }
 
@@ -180,8 +187,7 @@ public enum GradientChat {
     /// screen; unlike `logout`, the JWT stays so the conversation resumes on
     /// the next `present`.
     static func closeRequested() {
-        liveChat?.dismiss(animated: true)
-        liveChat = nil
+        dismiss()
     }
 
     static func interactiveToolCompletionReceived(

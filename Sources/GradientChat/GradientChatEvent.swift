@@ -19,10 +19,13 @@ public enum GradientChatEvent: Equatable, Sendable {
     /// never crosses the bridge.
     case surveySubmitted(resolved: Bool)
 
-    /// The customer tapped a deep link rendered by an interactive tool. The
-    /// host should open its native flow, then call
-    /// ``GradientChat/completeInteractiveTool(requestID:result:)``.
-    case deeplinkRequested(requestID: String, url: URL)
+    /// The customer tapped a link into the host app. With a `requestID` an
+    /// interactive tool is waiting: open the native flow, then call
+    /// ``GradientChat/completeInteractiveTool(requestID:result:)``. Without
+    /// one (a link in an agent reply), just open the screen. Either way the
+    /// host chooses to present it over the chat or call
+    /// ``GradientChat/dismiss(animated:)`` first.
+    case deeplinkRequested(requestID: String?, url: URL)
 
     /// Who sent a ``messageReceived(messageId:sender:)``.
     public enum Sender: Equatable, Sendable {
