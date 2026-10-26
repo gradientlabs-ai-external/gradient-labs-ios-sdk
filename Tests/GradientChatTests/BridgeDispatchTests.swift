@@ -73,11 +73,15 @@ final class BridgeDispatchTests: XCTestCase {
         XCTAssertEqual(listener.events, [event])
     }
 
-    func testDeeplinkMessageRejectsMissingRequestIDAndRelativeURL() {
-        XCTAssertNil(WidgetBridge.deeplinkEvent(
-            requestID: "",
-            rawURL: "gradientsample://track_paycheck"
-        ))
+    func testDeeplinkMessageWithoutRequestIDEmitsLinkOnly() throws {
+        let url = try XCTUnwrap(URL(string: "gradientsample://track_paycheck"))
+        XCTAssertEqual(
+            WidgetBridge.deeplinkEvent(requestID: "", rawURL: url.absoluteString),
+            .deeplinkRequested(requestID: nil, url: url)
+        )
+    }
+
+    func testDeeplinkMessageRejectsRelativeURL() {
         XCTAssertNil(WidgetBridge.deeplinkEvent(
             requestID: "async_tool_execution_1",
             rawURL: "/track_paycheck"
