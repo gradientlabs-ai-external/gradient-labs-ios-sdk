@@ -13,6 +13,9 @@ enum WidgetURL {
     /// unchanged.
     ///
     /// Each tag adds "&tag={value}"; the widget sanitises them.
+    ///
+    /// "&platform=ios" always comes last and tells the widget which app it is
+    /// running in.
     static func fragment(jwt: String, conversationToken: String?, tags: [String], shortSession: Bool) -> String {
         var fragment = "#jwt=\(jwt)"
         if let conversationToken, !conversationToken.isEmpty {
@@ -24,6 +27,7 @@ enum WidgetURL {
         if shortSession {
             fragment += "&use_short_session=1"
         }
+        fragment += "&platform=ios"
         return fragment
     }
 
